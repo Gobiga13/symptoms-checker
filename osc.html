@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Symptoms Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .symptom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .symptom-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .symptom-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .symptom-item.selected {
+            background: #e3f2fd;
+            border-color: #667eea;
+        }
+
+        .symptom-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .symptom-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .body-part-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .analyze-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .condition {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .condition h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .condition p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .severity {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .severity.low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .severity.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .severity.high {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .emergency {
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Health Symptoms Checker</h1>
+            <p>Get quick insights about your symptoms</p>
+        </div>
+
+        <div class="disclaimer">
+            <strong>⚠️ Important:</strong> This tool is for informational purposes only and does not replace professional medical advice. Always consult with a healthcare provider for accurate diagnosis and treatment.
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Select Body Area</h2>
+                <select class="body-part-select" id="bodyPart">
+                    <option value="">Choose affected area...</option>
+                    <option value="head">Head/Face</option>
+                    <option value="chest">Chest</option>
+                    <option value="abdomen">Abdomen</option>
+                    <option value="back">Back</option>
+                    <option value="limbs">Arms/Legs</option>
+                    <option value="general">General/Whole Body</option>
+                </select>
+            </div>
+
+            <div class="section">
+                <h2>Select Your Symptoms</h2>
+                <div class="symptom-grid" id="symptomGrid">
+                    <!-- Symptoms will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <button class="analyze-btn" id="analyzeBtn" disabled>Analyze Symptoms</button>
+
+            <div class="results" id="results">
+                <h3>Possible Conditions</h3>
+                <div id="resultsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const symptomsByBodyPart = {
+            head: ['Headache', 'Dizziness', 'Vision problems', 'Sore throat', 'Runny nose', 'Earache'],
+            chest: ['Chest pain', 'Shortness of breath', 'Cough', 'Palpitations', 'Wheezing'],
+            abdomen: ['Abdominal pain', 'Nausea', 'Vomiting', 'Diarrhea', 'Constipation', 'Bloating'],
+            back: ['Back pain', 'Stiffness', 'Muscle spasms', 'Numbness', 'Tingling'],
+            limbs: ['Joint pain', 'Swelling', 'Weakness', 'Numbness', 'Muscle cramps'],
+            general: ['Fever', 'Fatigue', 'Weight loss', 'Night sweats', 'Chills', 'Loss of appetite']
+        };
+
+        const conditions = {
+            'Common Cold': {
+                symptoms: ['Runny nose', 'Sore throat', 'Cough', 'Headache', 'Fatigue'],
+                severity: 'low',
+                advice: 'Rest, stay hydrated, and consider over-the-counter medications. Usually resolves in 7-10 days.'
+            },
+            'Flu (Influenza)': {
+                symptoms: ['Fever', 'Fatigue', 'Headache', 'Muscle cramps', 'Cough'],
+                severity: 'medium',
+                advice: 'Rest, fluids, and antiviral medications if prescribed. See a doctor if symptoms worsen.'
+            },
+            'Gastroenteritis': {
+                symptoms: ['Nausea', 'Vomiting', 'Diarrhea', 'Abdominal pain', 'Fever'],
+                severity: 'medium',
+                advice: 'Stay hydrated with electrolyte solutions. See a doctor if symptoms persist beyond 2 days.'
+            },
+            'Migraine': {
+                symptoms: ['Headache', 'Nausea', 'Vision problems', 'Dizziness'],
+                severity: 'medium',
+                advice: 'Rest in a quiet, dark room. Consult a doctor for prescription medications.'
+            },
+            'Muscle Strain': {
+                symptoms: ['Back pain', 'Muscle spasms', 'Stiffness', 'Joint pain'],
+                severity: 'low',
+                advice: 'Rest, ice, compression, and elevation (RICE). Consider physical therapy.'
+            },
+            'Anxiety': {
+                symptoms: ['Palpitations', 'Shortness of breath', 'Dizziness', 'Chest pain', 'Fatigue'],
+                severity: 'medium',
+                advice: 'Practice relaxation techniques. Consider speaking with a mental health professional.'
+            }
+        };
+
+        const emergencySymptoms = ['Chest pain', 'Shortness of breath', 'Severe headache', 'Loss of consciousness'];
+
+        let selectedSymptoms = [];
+        const bodyPartSelect = document.getElementById('bodyPart');
+        const symptomGrid = document.getElementById('symptomGrid');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const results = document.getElementById('results');
+        const resultsList = document.getElementById('resultsList');
+
+        bodyPartSelect.addEventListener('change', function() {
+            const bodyPart = this.value;
+            symptomGrid.innerHTML = '';
+            selectedSymptoms = [];
+            analyzeBtn.disabled = true;
+
+            if (bodyPart && symptomsByBodyPart[bodyPart]) {
+                symptomsByBodyPart[bodyPart].forEach(symptom => {
+                    const div = document.createElement('div');
+                    div.className = 'symptom-item';
+                    div.innerHTML = `
+                        <input type="checkbox" id="${symptom}" value="${symptom}">
+                        <label for="${symptom}">${symptom}</label>
+                    `;
+                    symptomGrid.appendChild(div);
+
+                    div.addEventListener('click', function(e) {
+                        if (e.target.tagName !== 'INPUT') {
+                            const checkbox = div.querySelector('input');
+                            checkbox.checked = !checkbox.checked;
+                            updateSelection(checkbox);
+                        } else {
+                            updateSelection(e.target);
+                        }
+                    });
+
+                    div.querySelector('input').addEventListener('change', function() {
+                        updateSelection(this);
+                    });
+                });
+            }
+        });
+
+        function updateSelection(checkbox) {
+            const item = checkbox.closest('.symptom-item');
+            if (checkbox.checked) {
+                item.classList.add('selected');
+                selectedSymptoms.push(checkbox.value);
+            } else {
+                item.classList.remove('selected');
+                selectedSymptoms = selectedSymptoms.filter(s => s !== checkbox.value);
+            }
+            analyzeBtn.disabled = selectedSymptoms.length === 0;
+        }
+
+        analyzeBtn.addEventListener('click', analyzeSymptoms);
+
+        function analyzeSymptoms() {
+            if (selectedSymptoms.length === 0) return;
+
+            let hasEmergency = selectedSymptoms.some(s => emergencySymptoms.includes(s));
+            let matches = [];
+
+            for (let [condition, data] of Object.entries(conditions)) {
+                let matchCount = data.symptoms.filter(s => selectedSymptoms.includes(s)).length;
+                if (matchCount > 0) {
+                    matches.push({
+                        name: condition,
+                        ...data,
+                        matchCount: matchCount,
+                        matchPercentage: (matchCount / selectedSymptoms.length) * 100
+                    });
+                }
+            }
+
+            matches.sort((a, b) => b.matchCount - a.matchCount);
+
+            resultsList.innerHTML = '';
+
+            if (hasEmergency) {
+                resultsList.innerHTML = `
+                    <div class="emergency">
+                        🚨 SEEK EMERGENCY MEDICAL ATTENTION: Some of your symptoms require immediate medical evaluation. Call emergency services or go to the nearest emergency room.
+                    </div>
+                `;
+            }
+
+            if (matches.length === 0) {
+                resultsList.innerHTML += `
+                    <div class="condition">
+                        <h4>No specific matches found</h4>
+                        <p>Your combination of symptoms doesn't match our database. Please consult a healthcare provider for proper evaluation.</p>
+                    </div>
+                `;
+            } else {
+                matches.forEach(match => {
+                    resultsList.innerHTML += `
+                        <div class="condition">
+                            <h4>${match.name}</h4>
+                            <span class="severity ${match.severity}">${match.severity.toUpperCase()} SEVERITY</span>
+                            <p><strong>Match:</strong> ${match.matchCount} of your symptoms</p>
+                            <p><strong>Advice:</strong> ${match.advice}</p>
+                        </div>
+                    `;
+                });
+            }
+
+            results.classList.add('show');
+            results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
